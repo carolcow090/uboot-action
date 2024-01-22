@@ -1,0 +1,60 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: Build Uboot
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install bc gcc-aarch64-linux-gnu build-essential flex bison libssl-dev
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        rm -rf uboot
+
+    - name: Clone code
+      run: git clone -b master --depth=1 https://github.com/hanwckf/bl-mt798x.git uboot
+
+    - name: Compile the firmware
+      id: compile
+      run: |
+        cd uboot
+        SOC=mt7981 BOARD=imou_lc-hx3001 ./build.sh
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    - name: Organize files
+      id: organize
+      run: |
+        cd uboot/output
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      with:
+        name: Uboot_imou_lc-hx3001${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
