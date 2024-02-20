@@ -35,7 +35,6 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        rm -rf uboot
 
     - name: Clone code
       run: git clone -b master --depth=1 https://github.com/hanwckf/bl-mt798x.git uboot
@@ -44,7 +43,7 @@ jobs:
       id: compile
       run: |
         cd uboot
-        SOC=mt7981 BOARD=imou_lc-hx3001 ./build.sh
+        SOC=mt7981 BOARD=cmcc_rax3000m ./build.sh
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: Organize files
@@ -56,5 +55,5 @@ jobs:
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       with:
-        name: Uboot_imou_lc-hx3001${{ env.FILE_DATE }}
+        name: Uboot-cmcc_rax3000m${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
