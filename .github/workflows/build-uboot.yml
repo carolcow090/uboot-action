@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 env:
-  BOARD: cmcc_rax3000m
+  BOARD: nokia_ea0326gmp
   TZ: Asia/Shanghai
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
 
     - name: Clone code
-      run: git clone -b master --depth=1 https://github.com/hanwckf/bl-mt798x.git uboot
+      run: git clone -b nokia --depth=1 https://github.com/1715173329/bl-mt798x-oss.git uboot
 
     - name: Compile the firmware
       id: compile
